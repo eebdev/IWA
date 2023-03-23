@@ -1,32 +1,39 @@
-// pages/api/dataReceiver.ts
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { query } from '../../database';
+import { NextApiRequest, NextApiResponse } from "next";
+import { query } from "../../database";
 
-type Data = {
-  message: string;
-};
-
-async function saveToDatabase(data: any): Promise<void> {
-  const { STN, DATE, TIME, TEMP, DEWP, STP, SLP, VISIB, WDSP, PRCP, SNDP, FRSHTT, CLDC, WNDDIR } = data;
+async function saveToDatabase(data: any) {
+  const {
+    STN,
+    DATE,
+    TIME,
+    TEMP,
+    DEWP,
+    STP,
+    SLP,
+    VISIB,
+    WDSP,
+    PRCP,
+    SNDP,
+    FRSHTT,
+    CLDC,
+    WNDDIR,
+  } = data;
 
   const datetime = `${DATE} ${TIME}`;
 
-  const sql = `
-    INSERT INTO station_data (stn, datetime, temp, dewp, stp, slp, visib, wdsp, prcp, sndp, frshtt, cldc, wnddir)
+  await query(`
+    INSERT INTO station_data (station_name, datetime, temp, dewp, stp, slp, visib, wdsp, prcp, sndp, frshtt, cldc, wnddir)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-    
-    
-
-  const values = [STN, datetime, TEMP, DEWP, STP, SLP, VISIB, WDSP, PRCP, SNDP, FRSHTT, CLDC, WNDDIR];
-  console.log(values);
-  await query(sql, values);
+  `, [STN, datetime, TEMP, DEWP, STP, SLP, VISIB, WDSP, PRCP, SNDP, FRSHTT, CLDC, WNDDIR]);
 }
 
 export default async function dataReceiver(req: NextApiRequest, res: NextApiResponse<Data>): Promise<void> {
   if (req.method === 'POST') {
     try {
-      const data = req.body;
+      const receivedData = JSON.parse(req.body);
+      
+      const data = receivedData.WEATHERDATA; // Access the data array
+
       for (const item of data) {
         await saveToDatabase(item);
       }
