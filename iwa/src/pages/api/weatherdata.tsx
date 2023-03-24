@@ -5,7 +5,7 @@ import {
   storeMissingStationData,
   updateMissingStationData,
   getStationData,
-} from "@database/weatherData";
+} from "@database/queries";
 import { StationData } from "@ctypes/types";
 
 /**

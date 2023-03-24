@@ -1,5 +1,5 @@
-import { query } from "@database/database";
-import { Station, WeatherData } from "@ctypes/types";
+import { query } from "@database/connection";
+import { StationData, WeatherData } from "@ctypes/types";
 import { calculateMissingValue } from "@helpers/missingData";
 
 /**
@@ -151,7 +151,9 @@ export async function updateMissingStationData(station_name: string) {
   }
 }
 
-export async function getStationData(station_name: string): Promise<Station> {
+export async function getStationData(
+  station_name: string
+): Promise<StationData> {
   const data = await query(
     `
         SELECT * FROM station_data
