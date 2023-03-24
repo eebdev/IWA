@@ -11,7 +11,7 @@ import { saveToDatabase, storeMissingData, updateMissingDataIfNeeded } from "@/w
  */
 export default async function dataReceiver(
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse<{ message: string }>
 ): Promise<void> {
   // Controleer of het verzoek een POST-methode is
   if (req.method === "POST") {
@@ -65,6 +65,6 @@ export default async function dataReceiver(
   } else {
     // Als de verzoekmethode geen POST is, stuur dan een 'Method Not Allowed' status en een bericht
     res.setHeader("Allow", "POST");
-    res.status(405).json({ message: "Method ${req.method} not allowed" });
+    res.status(405).json({ message: "Method not allowed" });
   }
 }
