@@ -174,3 +174,22 @@ CREATE TABLE `station_data`(
     `wnddir` SMALLINT NOT NULL,
     FOREIGN KEY (`station_name`) REFERENCES `station` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf16;
+
+CREATE TABLE `missing_data`(
+    `missing_data_id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `station_name` VARCHAR(10) NOT NULL,
+    `datetime` DATETIME NOT NULL,
+    `temp` DECIMAL(7, 2) DEFAULT NULL,
+    `dewp` DECIMAL(7, 2) DEFAULT NULL,
+    `stp` DECIMAL(7, 2) DEFAULT NULL,
+    `slp` DECIMAL(7, 2) DEFAULT NULL,
+    `visib` DECIMAL(7, 2) DEFAULT NULL,
+    `wdsp` DECIMAL(7, 2) DEFAULT NULL,
+    `prcp` DECIMAL(7, 2) DEFAULT NULL,
+    `sndp` DECIMAL(7, 2) DEFAULT NULL,
+    `frshtt` CHAR(6) DEFAULT NULL,
+    `cldc` DECIMAL(7, 2) DEFAULT NULL,
+    `wnddir` SMALLINT DEFAULT NULL,
+    `column_name` VARCHAR(20) NOT NULL,
+    FOREIGN KEY (`station_name`) REFERENCES `station` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf16;
