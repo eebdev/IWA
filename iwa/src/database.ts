@@ -18,7 +18,7 @@ const pool = mysql.createPool({
  * @param {any[]} [values=[]] - Een optionele array met waarden die in de query moeten worden ingevoegd.
  * @returns {Promise<any>} - Een Promise die resulteert in de queryresultaten.
  */
-export async function query<T = any>(sql: string, values: any[] = []): Promise<any> {
+export async function query<T extends mysql.ResultSetHeader = any>(sql: string, values: any[] = []): Promise<any> {
   // Verkrijg een verbinding uit de pool
   const connection = await pool.getConnection();
   try {
