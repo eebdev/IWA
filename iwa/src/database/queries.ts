@@ -1,5 +1,5 @@
 import { query } from "@database/connection";
-import { StationData, WeatherData } from "@ctypes/types";
+import { StationData, StationDataPoints, WeatherData } from "@ctypes/types";
 import { calculateMissingValue } from "@helpers/missingData";
 
 /**
@@ -162,4 +162,20 @@ export async function getStationData(
     [station_name]
   );
   return data[0];
+}
+
+export async function getStationDataByDateRange(
+  station_name: string,
+  start_date: string,
+  end_date: string
+): Promise<StationDataPoints> {
+  const data = await query(
+    `
+        SELECT * FROM station_data
+        WHERE station_name = ? AND datetime >= ? AND datetime <= ?
+    `,
+    [station_name, start_date, end_date + " 23:59:59"]
+  );
+  console.log(data, station_name, start_date, end_date);
+  return data;
 }
