@@ -5,6 +5,7 @@ import {
   storeMissingStationData,
   updateMissingStationData,
   getStationData,
+  getStationDataByDateRange,
 } from "@database/queries";
 import { StationData } from "@ctypes/types";
 
@@ -73,14 +74,25 @@ export default async function dataReceiver(
   } else if (req.method === "GET") {
     // Als de gebruiker geen ID opgeeft, stuur dan een 'Bad Request' status en een bericht
     if (req.query.id !== undefined) {
-      try {
-        const data = await getStationData(req.query.id as string);
-        res
-          .status(200)
-          .json({ message: "Data fetched successfully", data: data });
-      } catch (error) {
-        // Log en retourneer een foutmelding en HTTP-status als er een fout optreedt bij het ophalen van de gegevens
-        res.status(500).json({ message: "Error fetching data from database" });
+      console.log(req.query.start_date, req.query.end_date);
+      if (req.query.start_date !== undefined && req.query.end_date !== undefined) {
+        console.log("Date range provided");
+        try {
+          const data = await getStationDataByDateRange(req.query.id as string, req.query.start_date as string, req.query.end_date as string);
+          res.status(200).json({ message: "Data fetched successfully", data: data });
+        } catch( error) {
+          res.status(400).json({message: "Something went wrong"});
+        }
+      } else {
+        try {
+          const data = await getStationData(req.query.id as string);
+          res
+            .status(200)
+            .json({ message: "Data fetched successfully", data: data });
+        } catch (error) {
+          // Log en retourneer een foutmelding en HTTP-status als er een fout optreedt bij het ophalen van de gegevens
+          res.status(500).json({ message: "Error fetching data from database" });
+        }
       }
     } else {
       res.status(400).json({ message: "Missing query parameter 'id'" });

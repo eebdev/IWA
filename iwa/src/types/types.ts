@@ -31,3 +31,7 @@ export type StationData = {
   wdsp: string;
   wnddir: number;
 };
+
+export type StationDataPoints = {
+  data: StationData[];
+};
