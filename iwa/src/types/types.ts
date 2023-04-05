@@ -35,3 +35,7 @@ export type StationData = {
 export type StationDataPoints = {
   data: StationData[];
 };
+
+export type WeatherStation = {
+  station_name: number;
+};

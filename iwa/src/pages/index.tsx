@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
 import { ReactEventHandler } from 'react'
 import { useRouter } from 'next/router'
+import Link from 'next/link';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -32,6 +33,9 @@ export default function Home() {
             <option value="100200">100200</option>
             <option value="100260">100260</option>
           </select>
+          <Link href={'/compare'}>
+              <button>Compare weatherstations</button>
+          </Link>
         </section>
       </main>
     </>
