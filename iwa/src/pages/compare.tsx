@@ -11,7 +11,6 @@ const Compare = () => {
     const router = useRouter();
 
   useEffect(() => {
-    // Replace with your API endpoint for fetching the list of weather stations
     fetch('/api/weatherstations')
       .then((response) => response.json())
       .then((data: WeatherStation[]) => setStations(data));
@@ -30,7 +29,7 @@ const Compare = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className='compare-form' onSubmit={handleSubmit}>
       <label htmlFor="numberOfStations">Number of Weather Stations:</label>
       <input
         id="numberOfStations"
@@ -47,6 +46,7 @@ const Compare = () => {
           <label htmlFor={`station-${index}`}>Station {index + 1}:</label>
           <select
             id={`station-${index}`}
+            className='compare-station'
             value={selectedStations[index]}
             onChange={(e: ChangeEvent<HTMLSelectElement>) =>
               handleStationSelect(index, parseInt(e.target.value))
@@ -61,7 +61,7 @@ const Compare = () => {
           </select>
         </div>
       ))}
-      <button type="submit">Compare</button>
+      <button className='compare-button' type="submit">Compare</button>
     </form>
   );
 };

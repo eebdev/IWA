@@ -23,6 +23,9 @@
   },
   "devDependencies": {
     "@types/ws": "^8.5.4",
-    "eslint-plugin-react-hooks": "^4.6.0"
+    "autoprefixer": "^10.4.14",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.3.1"
   }
 }

@@ -2,14 +2,23 @@ import Head from 'next/head'
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
-import { ReactEventHandler } from 'react'
+import { ReactEventHandler, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link';
+import { WeatherStation } from '@ctypes/types'
 
 const inter = Inter({ subsets: ['latin'] })
 
+
 export default function Home() {
+  const [stations, setStations] = useState<WeatherStation[]>([]);
   const router = useRouter()
+
+  useEffect(() => {
+    fetch('/api/weatherstations')
+      .then((response) => response.json())
+      .then((data: WeatherStation[]) => setStations(data));
+  }, []);
 
   const handleSelect = (event: any) => {
     router.push(`/station/${event.target.value}`)
@@ -26,14 +35,15 @@ export default function Home() {
         <section className='main-section'>
         <div>
           <h1>Choose a weatherstation</h1>
-        </div>
-          <select onChange={handleSelect} name="stations" className="stations">
-            <option value="placeholder">Choose an option</option>
-            <option value="100150">100150</option>
-            <option value="100200">100200</option>
-            <option value="100260">100260</option>
+          </div>
+          <select onChange={handleSelect} name="stations" id="stations">
+            <option value="Choose a weatherstation">Choose a weatherstation</option>
+            {stations.map((station) => (
+              <option key={station.station_name} value={station.station_name}> {station.station_name} </option>
+            ))}
           </select>
-          <Link href={'/compare'}>
+          
+          <Link className='compare-button' href={'/compare'}>
               <button>Compare weatherstations</button>
           </Link>
         </section>
