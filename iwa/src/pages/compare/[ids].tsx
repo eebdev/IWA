@@ -5,9 +5,9 @@ import { useState } from "react";
 
 function renderStationData(data: StationData[]) {
   return (
-    <>
+    <div className="flex flex-row items-center text-center">
       {data.map((station, index) => (
-        <div key={index} className="station-data">
+        <div key={index} className="flex flex-row items-center justify-center bg-gray-200 rounded-lg p-2 m-2">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -34,7 +34,7 @@ function renderStationData(data: StationData[]) {
           </table>
         </div>
       ))}
-    </>
+    </div>
   );
 }
 
@@ -78,7 +78,6 @@ export default function StationsComparePage() {
           <br></br>
           <button type="submit">Submit</button>
         </form>
-      
     </>
   );
 }

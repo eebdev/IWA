@@ -32,7 +32,7 @@ export default function Home() {
       </Head>
       <main>
 
-        <section className='main-section'>
+        <section className='flex flex-col items-center justify-center'>
         <div>
           <h1>Choose a weatherstation</h1>
           </div>
@@ -43,7 +43,7 @@ export default function Home() {
             ))}
           </select>
           
-          <Link className='compare-button' href={'/compare'}>
+          <Link className='bg-gray-200 rounded-lg p-2 m-2' href={'/compare'}>
               <button>Compare weatherstations</button>
           </Link>
         </section>
