@@ -7,7 +7,7 @@ const Compare = () => {
     const [numberOfStations, setNumberOfStations] = useState(2);
     const [stations, setStations] = useState<WeatherStation[]>([]);
     const [selectedStations, setSelectedStations] = useState<number[]>([]);
-    
+
     const router = useRouter();
 
   useEffect(() => {
@@ -29,24 +29,32 @@ const Compare = () => {
   };
 
   return (
-    <form className='compare-form' onSubmit={handleSubmit}>
+    <form className='flex flex-row items-center justify-between bg-gray-200 rounded-lg p-2 m-2' onSubmit={handleSubmit}>
+        <div>
       <label htmlFor="numberOfStations">Number of Weather Stations:</label>
-      <input
+        <input
         id="numberOfStations"
+                className='flex flex-row items-end justify-end bg-gray-200 rounded-lg p-2 m-2'
         type="number"
               min="2"
               max="5"
         value={numberOfStations}
-        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-          setNumberOfStations(parseInt(e.target.value, 10))
+        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            let num = parseInt(e.target.value, 10);
+            if (num < 2) num = 2;
+            if (num > 5) num = 5;
+            setNumberOfStations(num)
+        }
         }
       />
+        </div>
+        <div className="flex flex-row items-center justify-between bg-gray-200 rounded-lg p-2 m-2">
       {Array.from({ length: numberOfStations }, (item, index) => (
         <div key={index}>
           <label htmlFor={`station-${index}`}>Station {index + 1}:</label>
           <select
             id={`station-${index}`}
-            className='compare-station'
+            className='flex flex-row items-end justify-end bg-gray-200 rounded-lg p-2 m-2'
             value={selectedStations[index]}
             onChange={(e: ChangeEvent<HTMLSelectElement>) =>
               handleStationSelect(index, parseInt(e.target.value))
@@ -61,7 +69,8 @@ const Compare = () => {
           </select>
         </div>
       ))}
-      <button className='compare-button' type="submit">Compare</button>
+      <button className='flex flex-row items-center justify-center bg-gray-200 rounded-lg p-2 m-2' type="submit">Compare</button>
+        </div>
     </form>
   );
 };

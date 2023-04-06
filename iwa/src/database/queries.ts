@@ -184,7 +184,6 @@ export async function getWeatherStations(): Promise<WeatherStation[]> {
   const data = await query(
     `
       SELECT DISTINCT station_name FROM station_data
-      ORDER BY station_name
     `
   );
   return data;
