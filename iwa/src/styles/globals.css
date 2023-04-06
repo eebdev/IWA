@@ -119,7 +119,6 @@ th {
     @apply font-bold;
     @apply text-sm;
     @apply text-gray-700;
-    @apply bg-gray-100;
     @apply p-2;
 }
 
@@ -174,3 +173,6 @@ tr:hover {
   font-size: 2rem;
 }
 
+.head-lightblue {
+  background-color: lightblue;
+}
