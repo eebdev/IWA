@@ -73,7 +73,7 @@ const Compare = () => {
                     ))}
                 </div>
                 <button
-                    className="w-32 p-2 text-lg font-semibold text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none"
+                    className="compare-button w-32 p-2 text-lg font-semibold rounded-md focus:outline-none"
                     type="submit"
                 >
                     Compare

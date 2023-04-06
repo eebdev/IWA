@@ -141,6 +141,14 @@ tr:hover {
   padding: 0px 5px;
   border-radius: 5px;
   border: black solid 1px;
+  transition: 200ms;
+}
+
+.compare-button:hover {
+  scale: 1.1;
+  background-color: black;
+  border: white solid 1px;
+  color: white;
 }
 
 .compare-button button{
