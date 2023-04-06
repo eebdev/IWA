@@ -1,14 +1,8 @@
 import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
-import { ReactEventHandler, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import Link from 'next/link';
 import { WeatherStation } from '@ctypes/types'
-
-const inter = Inter({ subsets: ['latin'] })
-
+import { useEffect, useState } from 'react'
+import Link from 'next/link';
 
 export default function Home() {
   const [stations, setStations] = useState<WeatherStation[]>([]);
@@ -16,8 +10,8 @@ export default function Home() {
 
   useEffect(() => {
     fetch('/api/weatherstations')
-      .then((response) => response.json())
-      .then((data: WeatherStation[]) => setStations(data));
+        .then((response) => response.json())
+        .then((data: WeatherStation[]) => setStations(data));
   }, []);
 
   const handleSelect = (event: any) => {
@@ -25,29 +19,36 @@ export default function Home() {
   }
 
   return (
-    <>
-      <Head>
-        <title>IWA</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
-      <main>
-
-        <section className='flex flex-col items-center justify-center'>
-        <div>
-          <h1>Choose a weatherstation</h1>
-          </div>
-          <select onChange={handleSelect} name="stations" id="stations">
-            <option value="Choose a weatherstation">Choose a weatherstation</option>
-            {stations.map((station) => (
-              <option key={station.station_name} value={station.station_name}> {station.station_name} </option>
-            ))}
-          </select>
-          
-          <Link className='bg-gray-200 rounded-lg p-2 m-2' href={'/compare'}>
-              <button>Compare weatherstations</button>
-          </Link>
-        </section>
-      </main>
-    </>
+      <>
+        <Head>
+          <title>IWA</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+        </Head>
+        <main className="bg-white min-h-screen p-6">
+          <section className="flex flex-col items-center justify-center space-y-4">
+            <div className="text-4xl font-bold text-gray-800">Choose a weatherstation</div>
+            <div className="w-72">
+              <select
+                  onChange={handleSelect}
+                  name="stations"
+                  id="stations"
+                  className="w-full p-2 text-lg border-2 border-gray-300 rounded-md focus:border-blue-300 focus:outline-none"
+              >
+                <option value="Choose a weatherstation">Choose a weatherstation</option>
+                {stations.map((station) => (
+                    <option key={station.station_name} value={station.station_name}>
+                      {station.station_name}
+                    </option>
+                ))}
+              </select>
+            </div>
+            <Link href={'/compare'}>
+              <button className="w-48 p-2 text-lg font-semibold text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none">
+                Compare weatherstations
+              </button>
+            </Link>
+          </section>
+        </main>
+      </>
   )
 }
