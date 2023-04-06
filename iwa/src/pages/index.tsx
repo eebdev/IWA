@@ -43,7 +43,7 @@ export default function Home() {
               </select>
             </div>
             <Link href={'/compare'}>
-              <button className="w-48 p-2 text-lg font-semibold text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none">
+              <button className="compare-button w-48 p-2 text-lg font-semibold rounded-md focus:outline-none">
                 Compare weatherstations
               </button>
             </Link>
