@@ -135,8 +135,7 @@ tr:hover {
     @apply bg-gray-200;
 }
 
-.compare-button {
-  margin-top: 2rem;
+.iwa-button { 
   background-color: white;
   padding: 0px 5px;
   border-radius: 5px;
@@ -144,7 +143,7 @@ tr:hover {
   transition: 200ms;
 }
 
-.compare-button:hover {
+.iwa-button:hover {
   scale: 1.1;
   background-color: black;
   border: white solid 1px;

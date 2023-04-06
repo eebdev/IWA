@@ -30,7 +30,7 @@ const Compare = () => {
     return (
         <div className="bg-white min-h-screen p-6">
             <form
-                className="flex flex-col items-center justify-center space-y-4"
+                className="flex flex-col items-center justify-center space-y-4 gap-4"
                 onSubmit={handleSubmit}
             >
                 <div className="flex items-center space-x-2">
@@ -50,7 +50,7 @@ const Compare = () => {
                         }}
                     />
                 </div>
-                <div className="flex flex-wrap items-center justify-center space-x-4 space-y-4">
+                <div className="flex flex-wrap items-center justify-center space-x-4 space-e-4">
                     {Array.from({ length: numberOfStations }, (item, index) => (
                         <div key={index} className="flex items-center space-x-2">
                             <label htmlFor={`station-${index}`}>Station {index + 1}:</label>
@@ -73,7 +73,7 @@ const Compare = () => {
                     ))}
                 </div>
                 <button
-                    className="compare-button w-32 p-2 text-lg font-semibold rounded-md focus:outline-none"
+                    className="iwa-button w-32 p-2 text-lg font-semibold rounded-md focus:outline-none"
                     type="submit"
                 >
                     Compare
