@@ -8,10 +8,10 @@ function renderStationData(data: StationData) {
         <table className="w-full divide-y divide-gray-200 shadow-lg rounded-md">
             <thead className="head-lightblue">
             <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs text-black uppercase font-bold tracking-wider">
                     Property
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs text-black uppercase font-bold tracking-wider">
                     Value
                 </th>
             </tr>
