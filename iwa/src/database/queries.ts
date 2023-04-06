@@ -176,16 +176,17 @@ export async function getStationDataByDateRange(
     `,
     [station_name, start_date, end_date + " 23:59:59"]
   );
-  console.log(data, station_name, start_date, end_date);
   return data;
 }
 
 export async function getWeatherStations(): Promise<WeatherStation[]> {
   const data = await query(
     `
-      SELECT DISTINCT station_name FROM station_data
-      ORDER BY station_name
+      SELECT DISTINCT station_name
+      FROM station_data
+      ORDER BY CAST(station_name AS UNSIGNED) ASC;
     `
   );
+
   return data;
 }
