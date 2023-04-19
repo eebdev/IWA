@@ -1,37 +1,37 @@
-import { query } from "@database/connection";
-import { StationData, StationDataPoints, WeatherData, WeatherStation } from "@ctypes/types";
-import { calculateMissingValue } from "@helpers/missingData";
+import {query} from "@database/connection";
+import {StationData, StationDataPoints, WeatherData, WeatherStation} from "@ctypes/types";
+import {calculateMissingValue} from "@helpers/missingData";
 
 /**
  * Slaat de weerdata op in de database.
  * @param {WeatherData} data - Het dataobject met weerinformatie.
  */
 export async function saveStationData(data: WeatherData) {
-  // Combineer de datum- en tijdvelden tot een enkele datetime-waarde
-  const datetime = `${data.DATE} ${data.TIME}`;
+    // Combineer de datum- en tijdvelden tot een enkele datetime-waarde
+    const datetime = `${data.DATE} ${data.TIME}`;
 
-  // Voer een query uit om de weerdata in de database op te slaan
-  await query(
-    `
+    // Voer een query uit om de weerdata in de database op te slaan
+    await query(
+        `
     INSERT INTO station_data (station_name, datetime, temp, dewp, stp, slp, visib, wdsp, prcp, sndp, frshtt, cldc, wnddir)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
-    [
-      data.STN,
-      datetime,
-      data.TEMP,
-      data.DEWP,
-      data.STP,
-      data.SLP,
-      data.VISIB,
-      data.WDSP,
-      data.PRCP,
-      data.SNDP,
-      data.FRSHTT,
-      data.CLDC,
-      data.WNDDIR,
-    ]
-  );
+        [
+            data.STN,
+            datetime,
+            data.TEMP,
+            data.DEWP,
+            data.STP,
+            data.SLP,
+            data.VISIB,
+            data.WDSP,
+            data.PRCP,
+            data.SNDP,
+            data.FRSHTT,
+            data.CLDC,
+            data.WNDDIR,
+        ]
+    );
 }
 
 /**
@@ -41,11 +41,11 @@ export async function saveStationData(data: WeatherData) {
  * @returns {Promise<WeatherData[]>} - Een array met de vorige en volgende 5 data punten.
  */
 async function getSurroundingData(
-  station_name: string,
-  datetime: string
+    station_name: string,
+    datetime: string
 ): Promise<WeatherData[]> {
-  const data = await query(
-    `
+    const data = await query(
+        `
     (SELECT * FROM station_data
     WHERE station_name = ? AND datetime < ?
     ORDER BY datetime DESC LIMIT 5)
@@ -54,11 +54,11 @@ async function getSurroundingData(
     WHERE station_name = ? AND datetime > ?
     ORDER BY datetime ASC LIMIT 5)
   `,
-    [station_name, datetime, station_name, datetime]
-  );
+        [station_name, datetime, station_name, datetime]
+    );
 
-  // console.log(data);
-  return data;
+    // console.log(data);
+    return data;
 }
 
 /**
@@ -67,35 +67,35 @@ async function getSurroundingData(
  * @param {string} column_name - De naam van de kolom waar de data mist.
  */
 export async function storeMissingStationData(
-  data: WeatherData,
-  column_name: string
+    data: WeatherData,
+    column_name: string
 ) {
-  // Combineer de datum- en tijdvelden tot een enkele datetime-waarde
-  const datetime = `${data.DATE} ${data.TIME}`;
+    // Combineer de datum- en tijdvelden tot een enkele datetime-waarde
+    const datetime = `${data.DATE} ${data.TIME}`;
 
-  // Voer een query uit om de weerdata in de database op te slaan
-  await query(
-    `
+    // Voer een query uit om de weerdata in de database op te slaan
+    await query(
+        `
     INSERT INTO missing_data (station_name, datetime, temp, dewp, stp, slp, visib, wdsp, prcp, sndp, frshtt, cldc, wnddir, column_name)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
-    [
-      data.STN,
-      datetime,
-      data.TEMP,
-      data.DEWP,
-      data.STP,
-      data.SLP,
-      data.VISIB,
-      data.WDSP,
-      data.PRCP,
-      data.SNDP,
-      data.FRSHTT,
-      data.CLDC,
-      data.WNDDIR,
-      column_name,
-    ]
-  );
+        [
+            data.STN,
+            datetime,
+            data.TEMP,
+            data.DEWP,
+            data.STP,
+            data.SLP,
+            data.VISIB,
+            data.WDSP,
+            data.PRCP,
+            data.SNDP,
+            data.FRSHTT,
+            data.CLDC,
+            data.WNDDIR,
+            column_name,
+        ]
+    );
 }
 
 /**
@@ -103,90 +103,154 @@ export async function storeMissingStationData(
  * @param {string} station_name - De naam van het weerstation.
  */
 export async function updateMissingStationData(station_name: string) {
-  // Haal alle missende data op voor het meegegeven weerstation
-  const missingDataList = await query(
-    "SELECT * FROM missing_data WHERE station_name = ?",
-    [station_name]
-  );
-
-  for (const missingData of missingDataList) {
-    // Haal de vorige en volgende 5 data punten op
-    const surroundingData = await getSurroundingData(
-      missingData.station_name,
-      missingData.datetime
+    // Haal alle missende data op voor het meegegeven weerstation
+    const missingDataList = await query(
+        "SELECT * FROM missing_data WHERE station_name = ?",
+        [station_name]
     );
 
-    if (surroundingData.length >= 10) {
-      // Berekent de gemiddelde waarde van de meegegeven kolom
-      const calculatedValue = calculateMissingValue(
-        surroundingData,
-        missingData.column_name
-      );
+    for (const missingData of missingDataList) {
+        // Haal de vorige en volgende 5 data punten op
+        const surroundingData = await getSurroundingData(
+            missingData.station_name,
+            missingData.datetime
+        );
 
-      if (calculatedValue !== null) {
-        // Update de missende data in de station_data tabel
-        await query(
-          `
+        if (surroundingData.length >= 10) {
+            // Berekent de gemiddelde waarde van de meegegeven kolom
+            const calculatedValue = calculateMissingValue(
+                surroundingData,
+                missingData.column_name
+            );
+
+            if (calculatedValue !== null) {
+                // Update de missende data in de station_data tabel
+                await query(
+                    `
           UPDATE station_data
           SET ${missingData.column_name} = ?
           WHERE station_name =           ? AND datetime = ?
           `,
-          [calculatedValue, missingData.station_name, missingData.datetime]
-        );
+                    [calculatedValue, missingData.station_name, missingData.datetime]
+                );
 
-        // Verwijder de missende data uit de missing_data tabel
-        await query(
-          `
+                // Verwijder de missende data uit de missing_data tabel
+                await query(
+                    `
             DELETE FROM missing_data
             WHERE station_name = ? AND datetime = ? AND column_name = ?
           `,
-          [
-            missingData.station_name,
-            missingData.datetime,
-            missingData.column_name,
-          ]
-        );
-      }
+                    [
+                        missingData.station_name,
+                        missingData.datetime,
+                        missingData.column_name,
+                    ]
+                );
+            }
+        }
     }
-  }
 }
 
 export async function getStationData(
-  station_name: string
+    station_name: string
 ): Promise<StationData> {
-  const data = await query(
-    `
+    const data = await query(
+        `
         SELECT * FROM station_data
         WHERE station_name = ? LIMIT 1
     `,
-    [station_name]
-  );
-  return data[0];
+        [station_name]
+    );
+    return data[0];
 }
 
 export async function getStationDataByDateRange(
-  station_name: string,
-  start_date: string,
-  end_date: string
+    station_name: string,
+    start_date: string,
+    end_date: string
 ): Promise<StationDataPoints> {
-  const data = await query(
-    `
+    const data = await query(
+        `
         SELECT * FROM station_data
         WHERE station_name = ? AND datetime >= ? AND datetime <= ?
     `,
-    [station_name, start_date, end_date + " 23:59:59"]
-  );
-  return data;
+        [station_name, start_date, end_date + " 23:59:59"]
+    );
+    return data;
 }
 
 export async function getWeatherStations(): Promise<WeatherStation[]> {
-  const data = await query(
-    `
+    const data = await query(
+        `
       SELECT DISTINCT station_name
       FROM station_data
       ORDER BY CAST(station_name AS UNSIGNED) ASC;
     `
-  );
+    );
 
-  return data;
+    return data;
+}
+
+export async function storeLastResponse(
+    data: WeatherData
+) {
+    const station_name = data.STN;
+    const datetime = `${data.DATE} ${data.TIME}`;
+
+    const lastResponse = await getLastResponse(station_name)
+
+    if (lastResponse.last_response !== undefined) {
+        await query(
+            `
+        UPDATE station_status
+        SET last_response = ?
+        WHERE station_name = ?
+      `,
+            [datetime, station_name]
+        );
+        return;
+    }
+
+    await query(
+        `
+    INSERT INTO station_status (station_name, last_response)
+    VALUES (?, ?)
+  `,
+        [station_name, datetime]
+    );
+}
+
+export async function getLastResponse(
+    station_name: string
+) {
+    const data = await query(
+        `
+        SELECT last_response FROM station_status
+        WHERE station_name = ? LIMIT 1
+    `,
+        [station_name]
+    );
+    return data[0];
+}
+
+export async function getAllLastResponse() {
+    return await query(
+        `
+        SELECT * FROM station_status
+        ORDER BY last_response DESC
+    `
+    );
+}
+
+export async function getCoordinates(
+    station_name: string
+) {
+    const data = await query(
+        `
+        SELECT latitude, longitude, name FROM station
+        WHERE name = ? LIMIT 1
+    `,
+        [station_name]
+    );
+    return data[0];
 }
