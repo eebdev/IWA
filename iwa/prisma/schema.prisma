@@ -1,0 +1,123 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model contract {
+  contract_id Int @id @default(autoincrement())
+  user_id     Int
+}
+
+model contract_station {
+  contract_station_id Int    @id @default(autoincrement())
+  contract_id         Int
+  station_name        String
+}
+
+model country {
+  country_code String @id
+  country      String
+}
+
+model geolocation {
+  id             Int    @id @default(autoincrement())
+  station_name   String
+  country_code   String
+  island         String
+  county         String
+  place          String
+  hamlet         String
+  town           String
+  municipality   String
+  state_district String
+  administrative String
+  state          String
+  village        String
+  region         String
+  province       String
+  city           String
+  locality       String
+  postcode       String
+  country        String
+}
+
+model missing_data {
+  missing_data_id Int     @id @default(autoincrement())
+  station_name    String
+  datetime        String
+  temp            Float?
+  dewp            Float?
+  stp             Float?
+  slp             Float?
+  visib           Float?
+  wdsp            Float?
+  prcp            Float?
+  sndp            Float?
+  frshtt          String?
+  cldc            Float?
+  wnddir          Int?
+  column_name     String
+}
+
+model nearestlocation {
+  id                     Int     @id @default(autoincrement())
+  station_name           String
+  name                   String
+  administrative_region1 String?
+  administrative_region2 String?
+  country_code           String
+  longitude              Float
+  latitude               Float
+}
+
+model station {
+  name      String @id
+  longitude Float
+  latitude  Float
+  elevation Float
+}
+
+model station_data {
+  station_data_id Int     @id @default(autoincrement())
+  station_name    String
+  datetime        String
+  temp            Float?
+  dewp            Float?
+  stp             Float?
+  slp             Float?
+  visib           Float?
+  wdsp            Float?
+  prcp            Float?
+  sndp            Float?
+  frshtt          String?
+  cldc            Float?
+  wnddir          Int?
+}
+
+model station_status {
+  station_name  String @id
+  last_response String
+}
+
+model subscription {
+  subscription_id   Int    @id @default(autoincrement())
+  subscription_type String
+  user_id           Int
+}
+
+model subscription_station {
+  subscription_station_id Int    @id @default(autoincrement())
+  subscription_id         Int
+  station_name            String
+}
+
+model user {
+  user_id    Int      @id @default(autoincrement())
+  email      String   @unique
+  password   String
+  api_token  String   @unique
+}
