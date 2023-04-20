@@ -15,7 +15,12 @@
     "jsx": "preserve",
     "incremental": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@components/*": ["./src/components/*"],
+      "@database/*": ["./src/database/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@helpers/*": ["./src/helpers/*"],
+      "@ctypes/*": ["./src/types/*"], // Making use of @ctypes/* to import types, @types is reserved in the node_modules folder
+      "@styles/*": ["./src/styles/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],

@@ -1,32 +1,14 @@
-import { query } from "./database";
-import { WeatherData } from "./types";
-import { calculateMissingValue } from "@/missingData";
+import { query } from "@database/connection";
+import { StationData, WeatherData } from "@ctypes/types";
+import { calculateMissingValue } from "@helpers/missingData";
 
 /**
  * Slaat de weerdata op in de database.
  * @param {WeatherData} data - Het dataobject met weerinformatie.
  */
-export async function saveToDatabase(data: WeatherData) {
-  // Destructureer de kolommen uit het dataobject
-  const {
-    STN,
-    DATE,
-    TIME,
-    TEMP,
-    DEWP,
-    STP,
-    SLP,
-    VISIB,
-    WDSP,
-    PRCP,
-    SNDP,
-    FRSHTT,
-    CLDC,
-    WNDDIR,
-  } = data;
-
+export async function saveStationData(data: WeatherData) {
   // Combineer de datum- en tijdvelden tot een enkele datetime-waarde
-  const datetime = `${DATE} ${TIME}`;
+  const datetime = `${data.DATE} ${data.TIME}`;
 
   // Voer een query uit om de weerdata in de database op te slaan
   await query(
@@ -35,19 +17,19 @@ export async function saveToDatabase(data: WeatherData) {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
     [
-      STN,
+      data.STN,
       datetime,
-      TEMP,
-      DEWP,
-      STP,
-      SLP,
-      VISIB,
-      WDSP,
-      PRCP,
-      SNDP,
-      FRSHTT,
-      CLDC,
-      WNDDIR,
+      data.TEMP,
+      data.DEWP,
+      data.STP,
+      data.SLP,
+      data.VISIB,
+      data.WDSP,
+      data.PRCP,
+      data.SNDP,
+      data.FRSHTT,
+      data.CLDC,
+      data.WNDDIR,
     ]
   );
 }
@@ -84,27 +66,12 @@ async function getSurroundingData(
  * @param {WeatherData} data - Het dataobject met weerinformatie.
  * @param {string} column_name - De naam van de kolom waar de data mist.
  */
-export async function storeMissingData(data: WeatherData, column_name: string) {
-  // Destructureer de kolommen uit het dataobject
-  const {
-    STN,
-    DATE,
-    TIME,
-    TEMP,
-    DEWP,
-    STP,
-    SLP,
-    VISIB,
-    WDSP,
-    PRCP,
-    SNDP,
-    FRSHTT,
-    CLDC,
-    WNDDIR,
-  } = data;
-
+export async function storeMissingStationData(
+  data: WeatherData,
+  column_name: string
+) {
   // Combineer de datum- en tijdvelden tot een enkele datetime-waarde
-  const datetime = `${DATE} ${TIME}`;
+  const datetime = `${data.DATE} ${data.TIME}`;
 
   // Voer een query uit om de weerdata in de database op te slaan
   await query(
@@ -113,19 +80,19 @@ export async function storeMissingData(data: WeatherData, column_name: string) {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
     [
-      STN,
+      data.STN,
       datetime,
-      TEMP,
-      DEWP,
-      STP,
-      SLP,
-      VISIB,
-      WDSP,
-      PRCP,
-      SNDP,
-      FRSHTT,
-      CLDC,
-      WNDDIR,
+      data.TEMP,
+      data.DEWP,
+      data.STP,
+      data.SLP,
+      data.VISIB,
+      data.WDSP,
+      data.PRCP,
+      data.SNDP,
+      data.FRSHTT,
+      data.CLDC,
+      data.WNDDIR,
       column_name,
     ]
   );
@@ -135,7 +102,7 @@ export async function storeMissingData(data: WeatherData, column_name: string) {
  * Update de missende data in de database.
  * @param {string} station_name - De naam van het weerstation.
  */
-export async function updateMissingDataIfNeeded(station_name: string) {
+export async function updateMissingStationData(station_name: string) {
   // Haal alle missende data op voor het meegegeven weerstation
   const missingDataList = await query(
     "SELECT * FROM missing_data WHERE station_name = ?",
@@ -182,4 +149,17 @@ export async function updateMissingDataIfNeeded(station_name: string) {
       }
     }
   }
+}
+
+export async function getStationData(
+  station_name: string
+): Promise<StationData> {
+  const data = await query(
+    `
+        SELECT * FROM station_data
+        WHERE station_name = ? LIMIT 1
+    `,
+    [station_name]
+  );
+  return data[0];
 }
