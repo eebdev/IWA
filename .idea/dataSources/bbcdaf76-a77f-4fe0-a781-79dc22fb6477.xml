@@ -1501,7 +1501,7 @@ week2|schema||student|localhost|SELECT|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="400" parent="312" name="station_data_id">
-      <AutoIncrement>129795</AutoIncrement>
+      <AutoIncrement>1</AutoIncrement>
       <DasType>int unsigned|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>

@@ -7,117 +7,153 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model contract {
-  contract_id Int @id @default(autoincrement())
-  user_id     Int
-}
-
-model contract_station {
-  contract_station_id Int    @id @default(autoincrement())
-  contract_id         Int
-  station_name        String
-}
-
 model country {
-  country_code String @id
-  country      String
+  country_code    String            @id @map("country_code")
+  country         String
+  geolocation     geolocation[]
+  nearestlocation nearestlocation[]
 }
 
 model geolocation {
-  id             Int    @id @default(autoincrement())
-  station_name   String
-  country_code   String
-  island         String
-  county         String
-  place          String
-  hamlet         String
-  town           String
-  municipality   String
-  state_district String
-  administrative String
-  state          String
-  village        String
-  region         String
-  province       String
-  city           String
-  locality       String
-  postcode       String
-  country        String
-}
+  id                  Int      @id @default(autoincrement()) @map("id")
+  station_name        Int      @map("station_name")
+  country_code        String
+  island              String?  @map("island")
+  county              String?  @map("county")
+  place               String?  @map("place")
+  hamlet              String?  @map("hamlet")
+  town                String?  @map("town")
+  municipality        String?  @map("municipality")
+  state_district      String?  @map("state_district")
+  administrative      String?  @map("administrative")
+  state               String?  @map("state")
+  village             String?  @map("village")
+  region              String?  @map("region")
+  province            String?  @map("province")
+  city                String?  @map("city")
+  locality            String?  @map("locality")
+  postcode            String?  @map("postcode")
+  country             String?  @map("country")
+  Country             country? @relation(fields: [countryCountry_code], references: [country_code])
+  countryCountry_code String?
+  station             station? @relation(fields: [station_name], references: [name])
+  stationName         Int?
 
-model missing_data {
-  missing_data_id Int     @id @default(autoincrement())
-  station_name    String
-  datetime        String
-  temp            Float?
-  dewp            Float?
-  stp             Float?
-  slp             Float?
-  visib           Float?
-  wdsp            Float?
-  prcp            Float?
-  sndp            Float?
-  frshtt          String?
-  cldc            Float?
-  wnddir          Int?
-  column_name     String
+  @@index([station_name], name: "fk_geolocation_station_name")
+  @@index([country_code], name: "fk_geolocation_country_code")
 }
 
 model nearestlocation {
-  id                     Int     @id @default(autoincrement())
-  station_name           String
-  name                   String
-  administrative_region1 String?
-  administrative_region2 String?
+  id                     Int      @id @default(autoincrement()) @map("id")
+  station_name           Int      @map("station_name")
+  name                   String?  @map("name")
+  administrative_region1 String?  @map("administrative_region1")
+  administrative_region2 String?  @map("administrative_region2")
   country_code           String
   longitude              Float
   latitude               Float
+  country                country? @relation(fields: [countryCountry_code], references: [country_code])
+  countryCountry_code    String?
+  station                station? @relation(fields: [station_name], references: [name])
+  stationName            Int?
+
+  @@index([station_name], name: "fk_nearestlocation_station_name")
+  @@index([country_code], name: "fk_nearestlocation_country_code")
 }
 
 model station {
-  name      String @id
-  longitude Float
-  latitude  Float
-  elevation Float
+  name                 Int                    @id @map("name")
+  longitude            Float                  @map("longitude")
+  latitude             Float                  @map("latitude")
+  elevation            Float                  @map("elevation")
+  geolocation          geolocation[]
+  neareslocation       nearestlocation[]
+  station_data         station_data[]
+  missing_data         missing_data[]
+  subscription_station subscription_station[]
+  contract_station     contract_station[]
+  station_status       station_status[]
 }
 
 model station_data {
-  station_data_id Int     @id @default(autoincrement())
-  station_name    String
-  datetime        String
-  temp            Float?
-  dewp            Float?
-  stp             Float?
-  slp             Float?
-  visib           Float?
-  wdsp            Float?
-  prcp            Float?
-  sndp            Float?
-  frshtt          String?
-  cldc            Float?
-  wnddir          Int?
+  station_data_id Int     @id @default(autoincrement()) @map("station_data_id")
+  station_name    Int     @map("station_name")
+  datetime        DateTime  @map("datetime")
+  temp            Decimal @map("temp")
+  dewp            Decimal @map("dewp")
+  stp             Decimal @map("stp")
+  slp             Decimal @map("slp")
+  visib           Decimal @map("visib")
+  wdsp            Decimal @map("wdsp")
+  prcp            Decimal @map("prcp")
+  sndp            Decimal @map("sndp")
+  frshtt          String  @map("frshtt")
+  cldc            Decimal @map("cldc")
+  wnddir          Int     @map("wnddir")
+  station         station @relation(fields: [station_name], references: [name])
 }
 
-model station_status {
-  station_name  String @id
-  last_response String
-}
-
-model subscription {
-  subscription_id   Int    @id @default(autoincrement())
-  subscription_type String
-  user_id           Int
-}
-
-model subscription_station {
-  subscription_station_id Int    @id @default(autoincrement())
-  subscription_id         Int
-  station_name            String
+model missing_data {
+  missing_data_id Int      @id @default(autoincrement()) @map("missing_data_id")
+  station_name    Int      @map("station_name")
+  datetime        DateTime   @map("datetime")
+  temp            Decimal? @map("temp")
+  dewp            Decimal? @map("dewp")
+  stp             Decimal? @map("stp")
+  slp             Decimal? @map("slp")
+  visib           Decimal? @map("visib")
+  wdsp            Decimal? @map("wdsp")
+  prcp            Decimal? @map("prcp")
+  sndp            Decimal? @map("sndp")
+  frshtt          String?  @map("frshtt")
+  cldc            Decimal? @map("cldc")
+  wnddir          Int?     @map("wnddir")
+  column_name     String   @map("column_name")
+  station         station  @relation(fields: [station_name], references: [name])
 }
 
 model user {
-  user_id    Int      @id @default(autoincrement())
-  email      String   @unique
-  password   String
-  api_token  String   @unique
+  user_id      Int            @id @default(autoincrement()) @map("user_id")
+  email        String         @unique @map("email")
+  password     String         @map("password")
+  api_token    String         @unique @map("api_token")
+  subscription subscription[]
+  contract     contract[]
+}
+
+model subscription {
+  subscription_id      Int                    @id @default(autoincrement()) @map("subscription_id")
+  subscription_type    String                 @map("subscription_type")
+  user_id              Int                    @map("user_id")
+  user                 user                   @relation(fields: [user_id], references: [user_id])
+  subscription_station subscription_station[]
+}
+
+model subscription_station {
+  subscription_station_id Int          @id @default(autoincrement()) @map("subscription_station_id")
+  subscription_id         Int          @map("subscription_id")
+  station_name            Int          @map("station_name")
+  subscription            subscription @relation(fields: [subscription_id], references: [subscription_id])
+  station                 station      @relation(fields: [station_name], references: [name])
+}
+
+model contract {
+  contract_id      Int                @id @default(autoincrement()) @map("contract_id")
+  user_id          Int                @map("user_id")
+  user             user               @relation(fields: [user_id], references: [user_id])
+  contract_station contract_station[]
+}
+
+model contract_station {
+  contract_station_id Int      @id @default(autoincrement()) @map("contract_station_id")
+  contract_id         Int      @map("contract_id")
+  station_name        Int      @map("station_name")
+  contract            contract @relation(fields: [contract_id], references: [contract_id])
+  station             station  @relation(fields: [station_name], references: [name])
+}
+
+model station_status {
+  station_name  Int     @id @map("station_name")
+  last_response DateTime  @map("last_response")
+  station       station @relation(fields: [station_name], references: [name])
 }
