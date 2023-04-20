@@ -1,5 +1,5 @@
 export type WeatherData = {
-  STN: string;
+  STN: number;
   DATE: string;
   TIME: string;
   TEMP: number;

@@ -1,256 +1,223 @@
-import { query } from "@database/connection";
-import {
-  StationData,
-  StationDataPoints,
-  WeatherData,
-  WeatherStation,
-} from "@ctypes/types";
-import { calculateMissingValue } from "@helpers/missingData";
+import {PrismaClient} from "@prisma/client";
+import {WeatherData} from "@ctypes/types";
+import {calculateMissingValue} from "@helpers/missingData";
 
-/**
- * Slaat de weerdata op in de database.
- * @param {WeatherData} data - Het dataobject met weerinformatie.
- */
+const prisma = new PrismaClient();
+
 export async function saveStationData(data: WeatherData) {
-  // Combineer de datum- en tijdvelden tot een enkele datetime-waarde
-  const datetime = `${data.DATE} ${data.TIME}`;
+    const datetime = new Date(`${data.DATE} ${data.TIME}`);
 
-  // Voer een query uit om de weerdata in de database op te slaan
-  await query(
-    `
-    INSERT INTO station_data (station_name, datetime, temp, dewp, stp, slp, visib, wdsp, prcp, sndp, frshtt, cldc, wnddir)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `,
-    [
-      data.STN,
-      datetime,
-      data.TEMP,
-      data.DEWP,
-      data.STP,
-      data.SLP,
-      data.VISIB,
-      data.WDSP,
-      data.PRCP,
-      data.SNDP,
-      data.FRSHTT,
-      data.CLDC,
-      data.WNDDIR,
-    ]
-  );
+    await prisma.station_data.create({
+        data: {
+            station_name: data.STN,
+            datetime: datetime,
+            temp: data.TEMP,
+            dewp: data.DEWP,
+            stp: data.STP,
+            slp: data.SLP,
+            visib: data.VISIB,
+            wdsp: data.WDSP,
+            prcp: data.PRCP,
+            sndp: data.SNDP,
+            frshtt: data.FRSHTT,
+            cldc: data.CLDC,
+            wnddir: data.WNDDIR,
+        },
+    });
 }
 
-/**
- * Ontvang de vorige en volgende 5 data punten van de meegegeven station_name en datetime.
- * @param {string} station_name - De naam van de weerstation.
- * @param {string} datetime -  De datum en tijd van de weerdata.
- * @returns {Promise<WeatherData[]>} - Een array met de vorige en volgende 5 data punten.
- */
 async function getSurroundingData(
-  station_name: string,
-  datetime: string
+    station_name: number,
+    datetime: string
 ): Promise<WeatherData[]> {
-  const data = await query(
-    `
-    (SELECT * FROM station_data
-    WHERE station_name = ? AND datetime < ?
-    ORDER BY datetime DESC LIMIT 5)
-    UNION ALL
-    (SELECT * FROM station_data
-    WHERE station_name = ? AND datetime > ?
-    ORDER BY datetime ASC LIMIT 5)
-  `,
-    [station_name, datetime, station_name, datetime]
-  );
+    const data = await prisma.station_data.findMany({
+        where: {
+            station_name: station_name,
+            datetime: {
+                lt: datetime,
+            },
+        },
+        orderBy: {
+            datetime: "desc",
+        },
+        take: 5,
+    });
 
-  // console.log(data);
-  return data;
+    const data2 = await prisma.station_data.findMany({
+        where: {
+            station_name: station_name,
+            datetime: {
+                gt: datetime,
+            },
+        },
+        orderBy: {
+            datetime: "asc",
+        },
+        take: 5,
+    });
+
+    return [...data, ...data2];
 }
 
-/**
- * Slaat de missende weerdata op in de database om deze later te kunnen gebruiken voor interpolatie.
- * @param {WeatherData} data - Het dataobject met weerinformatie.
- * @param {string} column_name - De naam van de kolom waar de data mist.
- */
 export async function storeMissingStationData(
-  data: WeatherData,
-  column_name: string
+    data: WeatherData,
+    column_name: string
 ) {
-  // Combineer de datum- en tijdvelden tot een enkele datetime-waarde
-  const datetime = `${data.DATE} ${data.TIME}`;
+    const datetime = new Date(`${data.DATE} ${data.TIME}`);
 
-  // Voer een query uit om de weerdata in de database op te slaan
-  await query(
-    `
-    INSERT INTO missing_data (station_name, datetime, temp, dewp, stp, slp, visib, wdsp, prcp, sndp, frshtt, cldc, wnddir, column_name)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `,
-    [
-      data.STN,
-      datetime,
-      data.TEMP,
-      data.DEWP,
-      data.STP,
-      data.SLP,
-      data.VISIB,
-      data.WDSP,
-      data.PRCP,
-      data.SNDP,
-      data.FRSHTT,
-      data.CLDC,
-      data.WNDDIR,
-      column_name,
-    ]
-  );
+    await prisma.missing_data.create({
+        data: {
+            station_name: data.STN,
+            datetime: datetime,
+            temp: data.TEMP,
+            dewp: data.DEWP,
+            stp: data.STP,
+            slp: data.SLP,
+            visib: data.VISIB,
+            wdsp: data.WDSP,
+            prcp: data.PRCP,
+            sndp: data.SNDP,
+            frshtt: data.FRSHTT,
+            cldc: data.CLDC,
+            wnddir: data.WNDDIR,
+            column_name: column_name,
+        },
+    });
 }
 
-/**
- * Update de missende data in de database.
- * @param {string} station_name - De naam van het weerstation.
- */
-export async function updateMissingStationData(station_name: string) {
-  // Haal alle missende data op voor het meegegeven weerstation
-  const missingDataList = await query(
-    "SELECT * FROM missing_data WHERE station_name = ?",
-    [station_name]
-  );
+export async function updateMissingStationData(station_name: number) {
+    const missingDataList = await prisma.missing_data.findMany({
+        where: {
+            station_name: station_name,
+        },
+    });
 
-  for (const missingData of missingDataList) {
-    // Haal de vorige en volgende 5 data punten op
-    const surroundingData = await getSurroundingData(
-      missingData.station_name,
-      missingData.datetime
-    );
-
-    if (surroundingData.length >= 10) {
-      // Berekent de gemiddelde waarde van de meegegeven kolom
-      const calculatedValue = calculateMissingValue(
-        surroundingData,
-        missingData.column_name
-      );
-
-      if (calculatedValue !== null) {
-        // Update de missende data in de station_data tabel
-        await query(
-          `
-          UPDATE station_data
-          SET ${missingData.column_name} = ?
-          WHERE station_name =           ? AND datetime = ?
-          `,
-          [calculatedValue, missingData.station_name, missingData.datetime]
-        );
-
-        // Verwijder de missende data uit de missing_data tabel
-        await query(
-          `
-            DELETE FROM missing_data
-            WHERE station_name = ? AND datetime = ? AND column_name = ?
-          `,
-          [
+    for (const missingData of missingDataList) {
+        const surroundingData = await getSurroundingData(
             missingData.station_name,
-            missingData.datetime,
-            missingData.column_name,
-          ]
+            missingData.datetime.toISOString()
         );
-      }
+
+        if (surroundingData.length >= 10) {
+            const calculatedValue = calculateMissingValue(
+                surroundingData,
+                missingData.column_name
+            );
+
+            if (calculatedValue !== null) {
+                await prisma.station_data.update({
+                    where: {
+                        station_data_id: missingData.missing_data_id,
+                    },
+                    data: {
+                        [missingData.column_name]: calculatedValue,
+                    },
+                });
+
+                await prisma.missing_data.delete({
+                    where: {
+                        missing_data_id: missingData.missing_data_id,
+                    },
+                });
+            }
+        }
     }
-  }
 }
 
-export async function getStationData(
-  station_name: string
-): Promise<StationData> {
-  const data = await query(
-    `
-        SELECT * FROM station_data
-        WHERE station_name = ? LIMIT 1
-    `,
-    [station_name]
-  );
-  return data[0];
+export async function getStationData(station_name: number) {
+    return prisma.station_data.findFirst({
+        where: {
+            station_name: station_name,
+        },
+        orderBy: {
+            datetime: "desc",
+        },
+    });
 }
 
 export async function getStationDataByDateRange(
-  station_name: string,
-  start_date: string,
-  end_date: string
-): Promise<StationDataPoints> {
-  const data = await query(
-    `
-        SELECT * FROM station_data
-        WHERE station_name = ? AND datetime >= ? AND datetime <= ?
-    `,
-    [station_name, start_date, end_date + " 23:59:59"]
-  );
-  return data;
+    station_name: number,
+    start_date: string,
+    end_date: string
+) {
+    return prisma.station_data.findMany({
+        where: {
+            station_name: station_name,
+            datetime: {
+                gte: start_date,
+                lte: end_date + " 23:59:59",
+            },
+        },
+    });
 }
 
-export async function getWeatherStations(): Promise<WeatherStation[]> {
-  const data = await query(
-    `
-      SELECT DISTINCT station_name
-      FROM station_data
-      ORDER BY station_name ASC
-      LIMIT 50;
-    `
-  );
-
-  return data;
+export async function getWeatherStations() {
+    return prisma.station_data.findMany({
+        select: {
+            station_name: true,
+        },
+        orderBy: {
+            station_name: "asc",
+        },
+        distinct: ["station_name"],
+    });
 }
 
 export async function storeLastResponse(data: WeatherData) {
-  const station_name = data.STN;
-  const datetime = `${data.DATE} ${data.TIME}`;
+    const station_name = data.STN;
+    const datetime = new Date(`${data.DATE} ${data.TIME}`)
 
-  const lastResponse = await getLastResponse(station_name);
+    const lastResponse = await getLastResponse(station_name);
 
-  if (lastResponse !== undefined) {
-    await query(
-      `
-        UPDATE station_status
-        SET last_response = ?
-        WHERE station_name = ?
-      `,
-      [datetime, station_name]
-    );
-    return;
-  }
+    if (lastResponse !== null) {
+        await prisma.station_status.update({
+            where: {
+                station_name: station_name,
+            },
+            data: {
+                last_response: datetime,
+            },
+        });
+        return;
+    }
 
-  await query(
-    `
-    INSERT INTO station_status (station_name, last_response)
-    VALUES (?, ?)
-  `,
-    [station_name, datetime]
-  );    
+    await prisma.station_status.create({
+        data: {
+            station_name: station_name,
+            last_response: datetime,
+        },
+    });
 }
 
-export async function getLastResponse(station_name: string) {
-  const data = await query(
-    `
-        SELECT last_response FROM station_status
-        WHERE station_name = ? LIMIT 1
-    `,
-    [station_name]
-  );
-  return data[0];
+export async function getLastResponse(station_name: number) {
+    return prisma.station_status.findFirst({
+        where: {
+            station_name: station_name,
+        },
+        select: {
+            last_response: true,
+        },
+    });
 }
+
 
 export async function getAllLastResponse() {
-  return await query(
-    `
-        SELECT * FROM station_status
-        ORDER BY last_response DESC
-    `
-  );
+    return prisma.station_status.findMany({
+        orderBy: {
+            last_response: "desc",
+        },
+    });
 }
 
-export async function getCoordinates(station_name: string) {
-  const data = await query(
-    `
-        SELECT latitude, longitude, name FROM station
-        WHERE name = ? LIMIT 1
-    `,
-    [station_name]
-  );
-  return data[0];
+export async function getCoordinates(station_name: number) {
+    return prisma.station.findFirst({
+        where: {
+            name: station_name,
+        },
+        select: {
+            latitude: true,
+            longitude: true,
+            name: true,
+        },
+    });
 }
