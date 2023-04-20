@@ -105,14 +105,27 @@ export async function updateMissingStationData(station_name: number) {
             );
 
             if (calculatedValue !== null) {
-                await prisma.station_data.update({
-                    where: {
-                        station_data_id: missingData.missing_data_id,
-                    },
+
+                missingData[missingData.column_name.toLowerCase()] = calculatedValue;
+                // console.log(missingData)
+                await prisma.station_data.create({
                     data: {
-                        [missingData.column_name]: calculatedValue,
-                    },
+                        station_name: missingData.station_name,
+                        datetime: missingData.datetime,
+                        temp: missingData.temp,
+                        dewp: missingData.dewp,
+                        stp: missingData.stp,
+                        slp: missingData.slp,
+                        visib: missingData.visib,
+                        wdsp: missingData.wdsp,
+                        prcp: missingData.prcp,
+                        sndp: missingData.sndp,
+                        frshtt: missingData.frshtt,
+                        cldc: missingData.cldc,
+                        wnddir: missingData.wnddir,
+                    }
                 });
+
 
                 await prisma.missing_data.delete({
                     where: {
@@ -137,15 +150,15 @@ export async function getStationData(station_name: number) {
 
 export async function getStationDataByDateRange(
     station_name: number,
-    start_date: string,
-    end_date: string
+    start_date: Date,
+    end_date: Date
 ) {
     return prisma.station_data.findMany({
         where: {
             station_name: station_name,
             datetime: {
                 gte: start_date,
-                lte: end_date + " 23:59:59",
+                lte: end_date,
             },
         },
     });
