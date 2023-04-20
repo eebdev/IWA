@@ -176,3 +176,8 @@ tr:hover {
 .head-lightblue {
   background-color: lightblue;
 }
+
+#chart {
+  width: 100%;
+  height: 400px;
+}

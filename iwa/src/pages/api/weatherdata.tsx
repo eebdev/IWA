@@ -84,7 +84,8 @@ export default async function dataReceiver(
                 res.status(400).json({message: "Invalid JSON data"});
             } else {
                 // Als de fout geen SyntaxError is, stuur dan een 'Internal Server Error' status en een bericht
-                res.status(500).json({message: "Error saving data to database"});
+                res.status(500).json({ message: "Error saving data to database" });
+                
             }
         }
     } else if (req.method === "GET") {
@@ -120,6 +121,7 @@ export default async function dataReceiver(
                             .json({message: "Data fetched successfully", data: data});
                     }
                 } catch (error) {
+                    console.log(error)
                     // Log en retourneer een foutmelding en HTTP-status als er een fout optreedt bij het ophalen van de gegevens
                     res
                         .status(500)
