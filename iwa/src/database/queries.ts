@@ -189,7 +189,8 @@ export async function getWeatherStations(): Promise<WeatherStation[]> {
     `
       SELECT DISTINCT station_name
       FROM station_data
-      ORDER BY CAST(station_name AS UNSIGNED) ASC;
+      ORDER BY station_name ASC
+      LIMIT 50;
     `
   );
 
@@ -220,7 +221,7 @@ export async function storeLastResponse(data: WeatherData) {
     VALUES (?, ?)
   `,
     [station_name, datetime]
-  );
+  );    
 }
 
 export async function getLastResponse(station_name: string) {
