@@ -242,3 +242,10 @@ CREATE TABLE `contract_station` (
   CONSTRAINT `fk_contract_station_contract_id` FOREIGN KEY (`contract_id`) REFERENCES `contract` (`contract_id`),
   CONSTRAINT `fk_contract_station_station_name` FOREIGN KEY (`station_name`) REFERENCES `station` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf16;
+
+CREATE TABLE `station_status` (
+`station_name` varchar(10) NOT NULL,
+`last_response` datetime NOT NULL,
+PRIMARY KEY (`station_name`),
+ INDEX idx_last_response (`last_response`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf16

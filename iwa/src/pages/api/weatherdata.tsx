@@ -6,6 +6,9 @@ import {
   updateMissingStationData,
   getStationData,
   getStationDataByDateRange,
+  storeLastResponse,
+  getAllLastResponse,
+  getCoordinates,
 } from "@database/queries";
 import { StationData } from "@ctypes/types";
 
@@ -16,12 +19,24 @@ import { StationData } from "@ctypes/types";
  * @param {NextApiResponse} res - Het NextApiResponse object.
  * @returns {Promise<void>} - Een lege promise.
  */
+
+const now = new Date();
+let requests = 0;
 export default async function dataReceiver(
   req: NextApiRequest,
   res: NextApiResponse<{ message: string; data?: StationData }>
 ): Promise<void> {
   // Controleer of het verzoek een POST-methode is
   if (req.method === "POST") {
+    // requests++;
+    // console.log("Requests:", requests)
+    // if (requests % 100 === 0) {
+    //     const date = new Date();
+    //     const timeTaken = date.getTime() - now.getTime();
+    //     const timeTakenInSeconds = timeTaken / 1000;
+    //     const requestsPerSecond = requests / timeTakenInSeconds;
+    //     console.log("Requests:", requests, "Requests per second:", requestsPerSecond);
+    // }
     try {
       // Parse de ontvangen data
       const receivedData = JSON.parse(req.body);
@@ -29,8 +44,9 @@ export default async function dataReceiver(
       // Haal de weerdata-array op
       const data = receivedData.WEATHERDATA;
 
-      // Verwerk elk item in de weerdata-array
       for (const item of data) {
+        await storeLastResponse(item);
+
         // Controleer of er een 'None' waarde in het item zit
         let hasMissingValue = false;
         let missingColumnName = "";
@@ -75,13 +91,23 @@ export default async function dataReceiver(
     // Als de gebruiker geen ID opgeeft, stuur dan een 'Bad Request' status en een bericht
     if (req.query.id !== undefined) {
       console.log(req.query.start_date, req.query.end_date);
-      if (req.query.start_date !== undefined && req.query.end_date !== undefined) {
+      if (
+        req.query.start_date !== undefined &&
+        req.query.end_date !== undefined
+      ) {
         console.log("Date range provided");
         try {
-          const data = await getStationDataByDateRange(req.query.id as string, req.query.start_date as string, req.query.end_date as string);
-          res.status(200).json({ message: "Data fetched successfully", data: data });
-        } catch( error) {
-          res.status(400).json({message: "Something went wrong"});
+          const data = await getStationDataByDateRange(
+            req.query.id as string,
+            req.query.start_date as string,
+            req.query.end_date as string
+          );
+          // @ts-ignore
+          res
+            .status(200)
+            .json({ message: "Data fetched successfully", data: data });
+        } catch (error) {
+          res.status(400).json({ message: "Something went wrong" });
         }
       } else {
         try {
@@ -91,7 +117,9 @@ export default async function dataReceiver(
             .json({ message: "Data fetched successfully", data: data });
         } catch (error) {
           // Log en retourneer een foutmelding en HTTP-status als er een fout optreedt bij het ophalen van de gegevens
-          res.status(500).json({ message: "Error fetching data from database" });
+          res
+            .status(500)
+            .json({ message: "Error fetching data from database" });
         }
       }
     } else {

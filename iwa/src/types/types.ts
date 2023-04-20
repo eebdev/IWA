@@ -35,3 +35,15 @@ export type StationData = {
 export type StationDataPoints = {
   data: StationData[];
 };
+
+export type WeatherStation = {
+  station_name: number;
+};
+
+export type Coordinate = {
+  latitude: number;
+  longitude: number;
+  name: string;
+};
+
+export type Coordinates = Coordinate[];

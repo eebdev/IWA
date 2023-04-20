@@ -1,5 +1,10 @@
 import { query } from "@database/connection";
-import { StationData, StationDataPoints, WeatherData } from "@ctypes/types";
+import {
+  StationData,
+  StationDataPoints,
+  WeatherData,
+  WeatherStation,
+} from "@ctypes/types";
 import { calculateMissingValue } from "@helpers/missingData";
 
 /**
@@ -176,6 +181,76 @@ export async function getStationDataByDateRange(
     `,
     [station_name, start_date, end_date + " 23:59:59"]
   );
-  console.log(data, station_name, start_date, end_date);
   return data;
+}
+
+export async function getWeatherStations(): Promise<WeatherStation[]> {
+  const data = await query(
+    `
+      SELECT DISTINCT station_name
+      FROM station_data
+      ORDER BY station_name ASC
+      LIMIT 50;
+    `
+  );
+
+  return data;
+}
+
+export async function storeLastResponse(data: WeatherData) {
+  const station_name = data.STN;
+  const datetime = `${data.DATE} ${data.TIME}`;
+
+  const lastResponse = await getLastResponse(station_name);
+
+  if (lastResponse !== undefined) {
+    await query(
+      `
+        UPDATE station_status
+        SET last_response = ?
+        WHERE station_name = ?
+      `,
+      [datetime, station_name]
+    );
+    return;
+  }
+
+  await query(
+    `
+    INSERT INTO station_status (station_name, last_response)
+    VALUES (?, ?)
+  `,
+    [station_name, datetime]
+  );    
+}
+
+export async function getLastResponse(station_name: string) {
+  const data = await query(
+    `
+        SELECT last_response FROM station_status
+        WHERE station_name = ? LIMIT 1
+    `,
+    [station_name]
+  );
+  return data[0];
+}
+
+export async function getAllLastResponse() {
+  return await query(
+    `
+        SELECT * FROM station_status
+        ORDER BY last_response DESC
+    `
+  );
+}
+
+export async function getCoordinates(station_name: string) {
+  const data = await query(
+    `
+        SELECT latitude, longitude, name FROM station
+        WHERE name = ? LIMIT 1
+    `,
+    [station_name]
+  );
+  return data[0];
 }
