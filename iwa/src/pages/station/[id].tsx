@@ -7,37 +7,13 @@ import { Chart, LineController, CategoryScale, LinearScale, PointElement, LineEl
 Chart.register(LineController, CategoryScale, LinearScale, PointElement, LineElement, Tooltip);
  
 
-const snapLinePlugin = {
-    id: 'snapLine',
-    afterDraw: (chart: Chart) => {
-      if (chart.tooltip.getActiveElements().length === 0) {
-        return;
-      }
-      const activePoint = chart.tooltip.getActiveElements()[0];
-      const ctx = chart.ctx;
-      const x = activePoint.element.x;
-      const yTop = chart.scales.y.top;
-      const yBottom = chart.scales.y.bottom;
-  
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(x, yTop);
-      ctx.lineTo(x, yBottom);
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
-      ctx.stroke();
-      ctx.restore();
-    },
-  };
-
+function createGraph(data: StationData) {
+  renderStationData(data);
+}
 
 function renderStationData(data: StationData) {
     const canvas = document.getElementById('chart') as HTMLCanvasElement;
     const ctx = canvas.getContext('2d');
-
-    
-    
-
     if (ctx) {
         const existingChart = Chart.getChart(ctx);
         if (existingChart) {
@@ -57,7 +33,11 @@ function renderStationData(data: StationData) {
                 },
               ],
             },
-            options: {
+          options: {
+            interaction: {
+              intersect: false,
+              mode: 'index',
+              },
               aspectRatio: 2,
               animation: {
                 duration: 2000,
@@ -71,6 +51,7 @@ function renderStationData(data: StationData) {
               },
               plugins: {
                 tooltip: {
+                  position: 'nearest',
                   callbacks: {
                     label: (context: any) => {
                       return `${context.dataset.label}: ${context.parsed.y}`;
@@ -79,7 +60,6 @@ function renderStationData(data: StationData) {
                 },
               },
             },
-            plugins: [snapLinePlugin],
 
         }); 
     } else {
@@ -108,7 +88,7 @@ export default function StationPage() {
     return (
         <>
             <div className="bg-white min-h-screen p-6">
-                <>{data ? renderStationData(data) : <p>Loading station data...</p>}</>
+                <>{data ? createGraph(data) : <p>Loading station data...</p>}</>
                 <div className="chart-container flex flex-wrap justify-center" style={{ 'width': '100vw', 'height': 400, 'marginTop': 100 }}>
                     <canvas id="chart"></canvas>
                 </div>
